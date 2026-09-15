@@ -1,7 +1,7 @@
 # 导入必要的模块
 import pyJianYingDraft as draft
 import time
-from util import generate_draft_url, url_to_hash, build_draft_asset_path
+from util import generate_draft_url, build_draft_asset_path, build_material_name
 from typing import Optional, Dict, Tuple, List
 from pyJianYingDraft import exceptions, Audio_scene_effect_type, Tone_effect_type, Speech_to_song_type, CapCut_Voice_filters_effect_type,CapCut_Voice_characters_effect_type,CapCut_Speech_to_song_effect_type, trange
 from create_draft import get_or_create_draft
@@ -74,7 +74,7 @@ def add_audio_track(
     # Download audio to local
     # local_audio_path = download_audio(audio_url, draft_dir)
 
-    material_name = f"audio_{url_to_hash(audio_url)}.mp3"  # Use original filename + timestamp + fixed mp3 extension
+    material_name = build_material_name(audio_url, "audio", "mp3")
     
     # Build draft_audio_path
     draft_audio_path = None

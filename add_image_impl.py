@@ -2,7 +2,7 @@ import uuid
 import pyJianYingDraft as draft
 import time
 from settings.local import IS_CAPCUT_ENV
-from util import generate_draft_url, url_to_hash, build_draft_asset_path
+from util import generate_draft_url, build_draft_asset_path, build_material_name
 from pyJianYingDraft import trange, Clip_settings
 from typing import Optional, Dict
 from pyJianYingDraft import exceptions
@@ -109,7 +109,7 @@ def add_image_impl(
         script.add_track(draft.Track_type.video, relative_index=relative_index)
     
     # Generate material_name but don't download the image
-    material_name = f"image_{url_to_hash(image_url)}.png"
+    material_name = build_material_name(image_url, "image", "png")
     
     # Build draft_image_path
     draft_image_path = None

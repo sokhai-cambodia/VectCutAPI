@@ -24,6 +24,14 @@ PREVIEW_ROUTER = "/draft/downloader"
 # 是否上传草稿文件
 IS_UPLOAD_DRAFT = False
 
+# CapCut 草稿的自定义存储目录（当用户在 CapCut 中设置了自定义草稿路径时使用）
+CAPCUT_DRAFTS_DIR = ""
+
+# 覆盖 capcut_pro_10 草稿配置中的平台信息（设备指纹、CapCut 版本等），
+# 使其匹配本机实际安装的 CapCut，而不必修改 draft_profiles.py 源码。
+# 只需提供要覆盖的字段，其余保留默认值。
+CAPCUT_PLATFORM_OVERRIDE = None
+
 # 端口号
 PORT = 9000
 
@@ -40,8 +48,11 @@ if os.path.exists(CONFIG_FILE_PATH):
             # 更新草稿模板配置。draft_profile 优先，is_capcut_env 保持向后兼容。
             if "draft_profile" in local_config:
                 profile_name = str(local_config["draft_profile"]).lower().replace(".", "_").replace("-", "_")
-                if profile_name in ("capcut", "capcut_legacy"):
+                if profile_name in ("capcut_legacy",):
                     DRAFT_PROFILE = "capcut_legacy"
+                    IS_CAPCUT_ENV = True
+                elif profile_name in ("capcut", "capcut_modern", "capcut_pro_10"):
+                    DRAFT_PROFILE = "capcut_pro_10"
                     IS_CAPCUT_ENV = True
                 elif profile_name in ("jianying", "jianying_legacy"):
                     DRAFT_PROFILE = "jianying_legacy"
@@ -71,6 +82,14 @@ if os.path.exists(CONFIG_FILE_PATH):
             # 更新是否上传草稿文件
             if "is_upload_draft" in local_config:
                 IS_UPLOAD_DRAFT = local_config["is_upload_draft"]
+
+            # 更新自定义草稿目录
+            if "capcut_drafts_dir" in local_config:
+                CAPCUT_DRAFTS_DIR = local_config["capcut_drafts_dir"]
+
+            # 更新平台信息覆盖
+            if "capcut_platform" in local_config:
+                CAPCUT_PLATFORM_OVERRIDE = local_config["capcut_platform"]
                 
             # 更新OSS配置
             if "oss_config" in local_config:

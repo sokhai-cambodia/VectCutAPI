@@ -15,3 +15,7 @@ config.json
 .venv/
 venv/
 tmp/
+
+# Draft build artifacts created by create_draft/save_draft when no explicit
+# draft_folder is given - these are generated output, not source.
+dfd_cat_*/

@@ -1,10 +1,18 @@
 {
-  "draft_profile": "capcut_legacy",  // capcut_legacy, jianying_legacy, or jianying_pro_10 for Jianying Pro 10.x
+  "draft_profile": "capcut_legacy",  // capcut_legacy, capcut_pro_10 (modern CapCut, e.g. 9.x), jianying_legacy, or jianying_pro_10 for Jianying Pro 10.x
   "is_capcut_env": true,  // Backward-compatible fallback. Ignored when draft_profile is set.
   "draft_domain": "https://www.capcutapi.top",  // Base domain for draft operations
   "port": 9001,  // Port number for the local server
   "preview_router": "/draft/downloader",  // Router path for preview functionality
   "is_upload_draft": false,  // Whether to upload drafts to remote storage
+  "capcut_drafts_dir": "",  // Custom CapCut drafts folder (Settings > Drafts Location in CapCut). Leave "" to use the OS default.
+  "capcut_platform": {  // Overrides capcut_pro_10's platform stamp to match YOUR installed CapCut/machine. Required if drafts get rejected as "unusual path"/unusable - CapCut validates this against the running app. Any subset of fields; omitted ones keep the built-in default.
+    "app_version": "9.5.0",  // Your installed CapCut version (Settings > About)
+    "os_version": "10.0.26200",  // Your Windows build number
+    "device_id": "",  // Sample one from an existing working draft's draft_content.json "platform" field
+    "mac_address": "",
+    "hard_disk_id": ""
+  },
   "oss_config": {  // General OSS (Object Storage Service) configuration
     "bucket_name": "your-bucket-name",  // OSS bucket name for general storage
     "access_key_id": "your-access-key-id",  // Access key ID for OSS authentication

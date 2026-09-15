@@ -19,7 +19,7 @@ import time
 import requests # Import requests for making HTTP calls
 import logging
 # Import configuration
-from settings import IS_UPLOAD_DRAFT
+from settings import IS_UPLOAD_DRAFT, CAPCUT_DRAFTS_DIR
 from draft_profiles import get_draft_profile, write_profile_content
 
 # --- Get your Logger instance ---
@@ -251,7 +251,12 @@ def save_draft_background(draft_id, draft_folder, task_id, project_name=None, au
         if auto_deploy or project_name:
             target_name = project_name or draft_id
             capcut_projects_dir = None
-            if os.name == 'nt':
+            if CAPCUT_DRAFTS_DIR and os.path.exists(CAPCUT_DRAFTS_DIR):
+                # User has configured a custom drafts storage location inside CapCut
+                # (Settings > Drafts Location). Deploying anywhere else causes CapCut
+                # to reject the draft as being from an "unusual path".
+                capcut_projects_dir = CAPCUT_DRAFTS_DIR
+            elif os.name == 'nt':
                 p = os.path.expandvars(r"%LOCALAPPDATA%\CapCut\User Data\Projects\com.lveditor.draft")
                 if os.path.exists(p):
                     capcut_projects_dir = p
@@ -270,6 +275,39 @@ def save_draft_background(draft_id, draft_folder, task_id, project_name=None, au
                     lock_f = os.path.join(dest_dir, ".locked")
                     if os.path.exists(lock_f):
                         os.remove(lock_f)
+
+                    # Material/asset paths inside draft_content.json (and its mirrors)
+                    # were written pointing at draft_dir (the build-time working
+                    # directory). Rewrite them to dest_dir now that the folder has
+                    # been copied there, otherwise CapCut flags the draft as coming
+                    # from an "unusual path" because its own asset references don't
+                    # match where it actually lives on disk.
+                    replacements = [
+                        # JSON-escaped form (backslashes doubled), as it actually
+                        # appears in the on-disk file text.
+                        (draft_dir.replace("\\", "\\\\"), dest_dir.replace("\\", "\\\\")),
+                        # Raw/forward-slash forms, in case any field isn't escaped.
+                        (draft_dir, dest_dir),
+                        (draft_dir.replace("\\", "/"), dest_dir.replace("\\", "/")),
+                    ]
+                    for root, _dirs, files in os.walk(dest_dir):
+                        for fname in files:
+                            if not fname.endswith((".json", ".tmp", ".bak")):
+                                continue
+                            fpath = os.path.join(root, fname)
+                            try:
+                                with open(fpath, "r", encoding="utf-8") as fh:
+                                    text = fh.read()
+                            except (UnicodeDecodeError, OSError):
+                                continue
+                            new_text = text
+                            for old, new in replacements:
+                                if old and old != new:
+                                    new_text = new_text.replace(old, new)
+                            if new_text != text:
+                                with open(fpath, "w", encoding="utf-8") as fh:
+                                    fh.write(new_text)
+
                     logger.info(f"Auto-deployed draft to CapCut directory: {dest_dir}")
                     deployed_path = dest_dir
                 except Exception as ex:

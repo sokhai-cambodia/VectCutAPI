@@ -36,6 +36,30 @@ JIANYING_10_PLATFORM = {
     "os": "windows",
 }
 
+# Default platform stamp for capcut_pro_10. CapCut (9.x+) validates this against
+# the running app rather than silently accepting an arbitrary stub, so drafts
+# stamped with the wrong platform/app_source get flagged as unusable ("unusual
+# path"). These defaults won't match every machine/CapCut version, so they're
+# overridable via config.json's "capcut_platform" (see settings/local.py) rather
+# than requiring a source edit here.
+CAPCUT_WIN_PLATFORM = {
+    "app_id": 359289,
+    "app_source": "cc",
+    "app_version": "9.5.0",
+    "device_id": "811431561241bff1c4b6ebf989706eb2",
+    "hard_disk_id": "",
+    "mac_address": "39fa39e8cbc166fe75b4efe959d29648",
+    "os": "windows",
+    "os_version": "10.0.26200",
+}
+
+try:
+    from settings.local import CAPCUT_PLATFORM_OVERRIDE
+except Exception:
+    CAPCUT_PLATFORM_OVERRIDE = None
+if CAPCUT_PLATFORM_OVERRIDE:
+    CAPCUT_WIN_PLATFORM = {**CAPCUT_WIN_PLATFORM, **CAPCUT_PLATFORM_OVERRIDE}
+
 PROFILES: Dict[str, DraftProfile] = {
     "capcut_legacy": DraftProfile(
         name="capcut_legacy",
@@ -60,12 +84,22 @@ PROFILES: Dict[str, DraftProfile] = {
         is_capcut_env=False,
         platform=JIANYING_10_PLATFORM,
     ),
+    "capcut_pro_10": DraftProfile(
+        name="capcut_pro_10",
+        template_dir="template_jianying_10_2",
+        content_file="draft_content.json",
+        content_mirrors=("draft_content.json.bak", "template-2.tmp"),
+        timeline_content_file="template.tmp",
+        is_capcut_env=True,
+        platform=CAPCUT_WIN_PLATFORM,
+    ),
 }
 
 PROFILE_ALIASES = {
-    "capcut": "jianying_pro_10",
+    "capcut": "capcut_pro_10",
     "capcut_legacy": "capcut_legacy",
-    "capcut_modern": "jianying_pro_10",
+    "capcut_modern": "capcut_pro_10",
+    "capcut_pro_10": "capcut_pro_10",
     "jianying": "jianying_pro_10",
     "jianying_legacy": "jianying_legacy",
     "jianying_10": "jianying_pro_10",

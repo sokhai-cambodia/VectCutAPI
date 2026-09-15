@@ -1,7 +1,7 @@
 import pyJianYingDraft as draft
 import time
 from settings.local import IS_CAPCUT_ENV
-from util import generate_draft_url, url_to_hash, build_draft_asset_path
+from util import generate_draft_url, build_draft_asset_path, build_material_name
 from pyJianYingDraft import trange, Clip_settings
 from typing import Optional, Dict
 from pyJianYingDraft import exceptions
@@ -117,7 +117,7 @@ def add_video_track(
         # video_duration = duration_result["output"]
     
     # Generate local filename
-    material_name = f"video_{url_to_hash(video_url)}.mp4"
+    material_name = build_material_name(video_url, "video", "mp4")
     # local_video_path = download_video(video_url, draft_dir)
     
     # Build draft_video_path

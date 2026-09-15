@@ -6,7 +6,10 @@ import os
 import hashlib
 import functools
 import time
+from urllib.parse import urlparse, unquote
 from settings.local import DRAFT_DOMAIN, PREVIEW_ROUTER, IS_CAPCUT_ENV
+
+_INVALID_FS_CHARS = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
 
 def hex_to_rgb(hex_color: str) -> tuple:
     """Convert hexadecimal color code to RGB tuple (range 0.0-1.0)"""
@@ -68,6 +71,33 @@ def url_to_hash(url, length=16):
     
     # Truncate to specified length of hexadecimal string
     return hash_object.hexdigest()[:length]
+
+
+def build_material_name(source: str, prefix: str, fallback_ext: str) -> str:
+    """
+    Derive a draft asset filename from the original source's own filename
+    (sanitized for the filesystem) instead of an opaque hash, so imported
+    assets stay recognizable inside the draft's assets folder.
+
+    Falls back to a hash-based name if the source has no usable filename
+    component (e.g. a URL with no path).
+    """
+    parsed = urlparse(source)
+    raw_name = os.path.basename(parsed.path) if parsed.scheme else os.path.basename(source)
+    raw_name = unquote(raw_name).strip()
+
+    if not raw_name:
+        return f"{prefix}_{url_to_hash(source)}.{fallback_ext.lstrip('.')}"
+
+    name, ext = os.path.splitext(raw_name)
+    name = _INVALID_FS_CHARS.sub('_', name).strip(' .') or prefix
+    ext = ext if ext else f".{fallback_ext.lstrip('.')}"
+
+    # Guard against overlong filenames (Windows MAX_PATH headroom)
+    if len(name) > 150:
+        name = name[:150]
+
+    return f"{name}{ext}"
 
 
 def timing_decorator(func_name):
