@@ -310,6 +310,13 @@ def save_draft_background(draft_id, draft_folder, task_id, project_name=None, au
 
                     logger.info(f"Auto-deployed draft to CapCut directory: {dest_dir}")
                     deployed_path = dest_dir
+
+                    # The deployed copy now references only its own files, so the
+                    # build-time working folder (e.g. VectCutAPI/dfd_cat_*) is no
+                    # longer needed. Left in place if deploy fails, for debugging.
+                    if os.path.normcase(os.path.abspath(draft_dir)) != os.path.normcase(os.path.abspath(dest_dir)):
+                        shutil.rmtree(draft_dir, ignore_errors=True)
+                        logger.info(f"Cleaned up working draft folder: {draft_dir}")
                 except Exception as ex:
                     logger.error(f"Failed to auto-deploy draft to CapCut: {str(ex)}")
 
