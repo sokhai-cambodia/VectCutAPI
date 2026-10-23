@@ -154,9 +154,9 @@ class Track(Base_track, Generic[Seg_type]):
                     
                 # 添加关键帧
                 target_segment.add_keyframe(property_enum, offset_time, float_value)
-                print(f"成功添加关键帧: {property_type} 在 {time}s")
+                print(f"Added keyframe: {property_type} at {time}s")
             except Exception as e:
-                print(f"添加关键帧失败: {str(e)}")
+                print(f"Failed to add keyframe: {str(e)}")
         
         # 清空待处理的关键帧
         self.pending_keyframes = []
